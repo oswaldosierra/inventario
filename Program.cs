@@ -39,38 +39,9 @@ MostrarBanner();
 
 EstadoSistema();
 
-Console.WriteLine("Ingrese una cantidad: ");
-string input = Console.ReadLine();
-
-if (int.TryParse(input, out int cantidad))
-{
-  Console.WriteLine($"Cantidad ingresada: {cantidad}");
-  cantidadProductos += cantidad;
-}
-else
-{
-  Console.WriteLine("Entrada no válida para cantidad.");
-}
-
-
-Console.WriteLine("Ingrese un precio: ");
-string? inputPrecio = Console.ReadLine();
-
-if (decimal.TryParse(inputPrecio, out decimal precioIngresado))
-{
-  Console.WriteLine($"Precio ingresado: {precioIngresado:C}");
-  valorTotalInventario += precioIngresado * cantidadProductos;
-
-  Console.WriteLine($"Valor total actualizado del inventario: {valorTotalInventario:N2}");
-}
-else
-{
-  Console.WriteLine("Entrada no válida para precio.");
-}
-
 while (sistemaActivo)
 {
-  Console.Write("Ingrese un comando (o 'salir' para terminar): ");
+  MostrarMenu();
 
   string? entrada = Console.ReadLine();
 
@@ -83,14 +54,76 @@ while (sistemaActivo)
       sistemaActivo = false;
       break;
 
+    case "agregar":
+      AgregarProducto();
+      break;
+
     case "listar":
-      Console.WriteLine($"Productos registrados: {cantidadProductos}");
+      ListarProductos();
       break;
 
     default:
       Console.WriteLine("Comando no reconocido. Use 'listar' para ver el estado o 'salir' para terminar.");
       break;
   }
+}
+
+// Funciones auxiliares
+
+void MostrarMenu()
+{
+  Console.WriteLine();
+  Console.WriteLine("Seleccione una opción:");
+  Console.WriteLine("1. Listar productos (escriba 'listar')");
+  Console.WriteLine("2. Agregar producto (escriba 'agregar')");
+  Console.WriteLine("3. Salir (escriba 'salir')");
+  Console.Write("Opción: ");
+}
+
+void ListarProductos()
+{
+  Console.WriteLine("Listado de productos:");
+  Console.WriteLine($"- Cantidad total: {cantidadProductos}");
+  Console.WriteLine($"- Valor total del inventario: {valorTotalInventario:N2}");
+}
+
+void AgregarProducto()
+{
+  Console.WriteLine("Ingrese la cantidada de productos: ");
+  string input = Console.ReadLine();
+
+  if (int.TryParse(input, out int cantidad))
+  {
+    Console.WriteLine($"Cantidad ingresada: {cantidad}");
+    cantidadProductos += cantidad;
+  }
+  else
+  {
+    Console.WriteLine("Entrada no válida para cantidad.");
+  }
+
+
+  Console.WriteLine("Ingrese el precio unitario: ");
+  string? inputPrecio = Console.ReadLine();
+
+  if (decimal.TryParse(inputPrecio, out decimal precioIngresado))
+  {
+    Console.WriteLine($"Precio ingresado: {precioIngresado:C}");
+    valorTotalInventario += precioIngresado * cantidadProductos;
+
+    Console.WriteLine($"Valor total actualizado del inventario: {valorTotalInventario:N2}");
+  }
+  else
+  {
+    Console.WriteLine("Entrada no válida para precio.");
+  }
+}
+
+void BuscarProducto(string nombre)
+{
+  Console.WriteLine($"Buscando producto: {nombre}");
+  // Aquí se implementaría la lógica de búsqueda en un sistema real
+  Console.WriteLine("Producto no encontrado (función de búsqueda no implementada).");
 }
 
 void MostrarBanner()
@@ -103,7 +136,6 @@ void MostrarBanner()
   Console.WriteLine($".NET Versión: {Environment.Version}");
   Console.WriteLine("");
 }
-
 
 void MostrarAyuda()
 {
