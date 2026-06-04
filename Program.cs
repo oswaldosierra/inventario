@@ -4,48 +4,128 @@
 // ==================================================
 
 using Inventario.Factories;
+using Inventario.Infrastructure;
 using Inventario.Models;
-using Inventario.Repositories;
 
-Console.WriteLine("====================== InventarioApp====================");
-
-var repository = new InMemoryProductoRepository();
-
-Producto laptop = ProductoFactory.Create(nombre: "Laptop Dell XPS 13", precio: 1200, cantidad: 5, CategoriaProducto.Electronica);
-Producto mouse = ProductoFactory.Create(nombre: "Mouse Logitech MX Master", precio: 99, cantidad: 20, CategoriaProducto.Electronica);
-Producto teclado = ProductoFactory.Create(nombre: "Teclado Mecánico", precio: 150, cantidad: 3, CategoriaProducto.Electronica);
-Producto silla = ProductoFactory.Create(nombre: "Silla Ergonómica Herman Miller", precio: 500, cantidad: 8, CategoriaProducto.Muebles);
-Producto escritorio = ProductoFactory.Create(nombre: "Escritorio Stand-up", precio: 300, cantidad: 2, CategoriaProducto.Muebles);
-
-repository.Agregar(laptop);
-repository.Agregar(mouse);
-repository.Agregar(teclado);
-repository.Agregar(silla);
-repository.Agregar(escritorio);
-
-Console.WriteLine($"Productos agregados: {repository.Cantidad}");
-
-IEnumerable<Producto> electronicos = repository.BuscarPorCategoria(CategoriaProducto.Electronica);
-Console.WriteLine($"Productos electronicos: {electronicos.Count()}");
-
-foreach (Producto producto in electronicos)
+var productos = new List<Producto>
 {
-    Console.WriteLine($" {producto.Nombre} : {producto.Precio:C2}");
-}
+    ProductoFactory.Create("Laptop", 1200.00m, 3, CategoriaProducto.Electronica),
+    ProductoFactory.Create("Camisa", 45.00m, 15, CategoriaProducto.Ropa),
+    ProductoFactory.Create("Arroz", 12.00m, 50, CategoriaProducto.Alimentos),
+    ProductoFactory.Create("Lampara", 35.00m, 2, CategoriaProducto.Hogar),
+    ProductoFactory.Create("balon", 25.00m, 8, CategoriaProducto.Deportes),
+    ProductoFactory.Create("Mesa", 150.00m, 4, CategoriaProducto.Muebles),
+};
 
-IEnumerable<Producto> conMouse = repository.BuscarPorNombre("mouse");
-Console.WriteLine($"\nProductos con mouse: {conMouse.Count()}");
+var generador = new GeneradorReportes(productos);
 
-foreach (Producto producto in conMouse)
-{
-    Console.WriteLine($" {producto.Nombre} : {producto.Precio:C2}");
-}
+Console.WriteLine(generador.GenerarResumen());
+Console.WriteLine("\n");
 
-IEnumerable<string> nombres = repository.ObtenerNombres();
-Console.WriteLine($"\nTodos los nombres de los productos: {string.Join(", ", nombres)}");
+Console.WriteLine(generador.GenerarReporteStockajo());
+Console.WriteLine("\n");
 
-bool hayStockBajo = repository.HayStockBajo();
-Console.WriteLine($"\nHay stock bajo: {hayStockBajo}");
+Console.WriteLine(generador.GenerarTopProductos());
+Console.WriteLine("\n");
+
+Console.WriteLine(generador.ExportarCsv());
+Console.WriteLine("\n");
+
+Console.WriteLine(generador.ExportarResumenJson());
+Console.WriteLine("\n");
+
+
+
+// using Inventario.Factories;
+// using Inventario.Infrastructure;
+// using Inventario.Models;
+// using Inventario.Repositories;
+
+// Console.WriteLine("====================== InventarioApp====================");
+
+// var fileManager = new Filemanager();
+// string contenido = "Inventario actualizado";
+// fileManager.Escribir("inventario.txt", contenido);
+
+// string leerContenido = fileManager.Leer("inventario.txt");
+// Console.WriteLine(leerContenido);
+
+// var almacenamiento = new JsonInventarioStorage();
+// var productos = new List<Producto>()
+// {
+//     new Producto
+//     {
+//         Id = 1,
+//         Nombre = "Laptop",
+//         Precio = 19.199m,
+//         Cantidad = 10,
+//         Categoria = CategoriaProducto.Electronica,
+//         Estado = EstadoProducto.Activo
+//     },
+//     new Producto
+//     {
+//         Id =2,
+//         Nombre="Camiseta",
+//         Precio=29.63m,
+//         Cantidad=6,
+//         Categoria= CategoriaProducto.Ropa,
+//         Estado=EstadoProducto.Activo
+//     }
+// };
+// string ruta = "inventario_json.json";
+
+// almacenamiento.CrearBackup(ruta);
+// almacenamiento.Guardar(productos, ruta);
+
+// Console.WriteLine("Inventario guardado");
+
+// var productosCargados = almacenamiento.Cargar(ruta);
+
+// Console.WriteLine("Inventario cargado");
+
+// foreach (var producto in productosCargados)
+// {
+//     Console.WriteLine($"ID: {producto.Id} y su nombre es: {producto.Nombre}");
+// }
+
+
+// var repository = new InMemoryProductoRepository();
+
+// Producto laptop = ProductoFactory.Create(nombre: "Laptop Dell XPS 13", precio: 1200, cantidad: 5, CategoriaProducto.Electronica);
+// Producto mouse = ProductoFactory.Create(nombre: "Mouse Logitech MX Master", precio: 99, cantidad: 20, CategoriaProducto.Electronica);
+// Producto teclado = ProductoFactory.Create(nombre: "Teclado Mecánico", precio: 150, cantidad: 3, CategoriaProducto.Electronica);
+// Producto silla = ProductoFactory.Create(nombre: "Silla Ergonómica Herman Miller", precio: 500, cantidad: 8, CategoriaProducto.Muebles);
+// Producto escritorio = ProductoFactory.Create(nombre: "Escritorio Stand-up", precio: 300, cantidad: 2, CategoriaProducto.Muebles);
+
+// repository.Agregar(laptop);
+// repository.Agregar(mouse);
+// repository.Agregar(teclado);
+// repository.Agregar(silla);
+// repository.Agregar(escritorio);
+
+// Console.WriteLine($"Productos agregados: {repository.Cantidad}");
+
+// IEnumerable<Producto> electronicos = repository.BuscarPorCategoria(CategoriaProducto.Electronica);
+// Console.WriteLine($"Productos electronicos: {electronicos.Count()}");
+
+// foreach (Producto producto in electronicos)
+// {
+//     Console.WriteLine($" {producto.Nombre} : {producto.Precio:C2}");
+// }
+
+// IEnumerable<Producto> conMouse = repository.BuscarPorNombre("mouse");
+// Console.WriteLine($"\nProductos con mouse: {conMouse.Count()}");
+
+// foreach (Producto producto in conMouse)
+// {
+//     Console.WriteLine($" {producto.Nombre} : {producto.Precio:C2}");
+// }
+
+// IEnumerable<string> nombres = repository.ObtenerNombres();
+// Console.WriteLine($"\nTodos los nombres de los productos: {string.Join(", ", nombres)}");
+
+// bool hayStockBajo = repository.HayStockBajo();
+// Console.WriteLine($"\nHay stock bajo: {(hayStockBajo ? "Si" : "No")}");
 
 
 // ==================================================

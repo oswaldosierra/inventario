@@ -7,3 +7,5 @@ obj/
 *.temporales
 *.DS_Store
 Thumbs.db
+inventario.txt
+inventario_json.json
