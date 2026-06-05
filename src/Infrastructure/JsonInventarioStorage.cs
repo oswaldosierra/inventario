@@ -39,7 +39,7 @@ public class JsonInventarioStorage
       return null;
     }
 
-    string directorio = Path.GetDirectoryName(ruta);
+    string? directorio = Path.GetDirectoryName(ruta);
     string nombreSinExtension = Path.GetFileNameWithoutExtension(ruta);
     string extencion = Path.GetExtension(ruta);
     string timestamp = DateTime.Now.ToString("yyyy-MM-DD_HH-mm-ss");

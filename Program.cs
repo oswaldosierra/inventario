@@ -3,36 +3,243 @@
 // Estado: Estructura profesional configurada
 // ==================================================
 
-using Inventario.Factories;
-using Inventario.Infrastructure;
+using System.Security.Cryptography.X509Certificates;
 using Inventario.Models;
+using Inventario.Services;
 
-var productos = new List<Producto>
+var servicio = new InventarioService();
+
+bool activo = true;
+
+while (activo)
 {
-    ProductoFactory.Create("Laptop", 1200.00m, 3, CategoriaProducto.Electronica),
-    ProductoFactory.Create("Camisa", 45.00m, 15, CategoriaProducto.Ropa),
-    ProductoFactory.Create("Arroz", 12.00m, 50, CategoriaProducto.Alimentos),
-    ProductoFactory.Create("Lampara", 35.00m, 2, CategoriaProducto.Hogar),
-    ProductoFactory.Create("balon", 25.00m, 8, CategoriaProducto.Deportes),
-    ProductoFactory.Create("Mesa", 150.00m, 4, CategoriaProducto.Muebles),
-};
+    MostrarMenu();
+    string option = Console.ReadLine() ?? "";
 
-var generador = new GeneradorReportes(productos);
+    switch (option)
+    {
+        case "1":
+            AgregarProducto();
+            break;
+        case "2":
+            ListarProductos();
+            break;
+        case "3":
+            BuscarPorId();
+            break;
+        case "4":
+            EliminarProducto();
+            break;
+        case "5":
+            BuscarPorCategoria();
+            break;
+        case "6":
+            MostrarResumen();
+            break;
+        case "7":
+            MostrarStockBajo();
+            break;
+        case "8":
+            MostrarEstadisticas();
+            break;
+        case "9":
+            ExportarCsv();
+            break;
+        case "10":
+            activo = false;
+            Console.WriteLine("\n!hasta Luego!");
+            break;
+        default:
+            Console.WriteLine("\nOpcion no valida.");
+            break;
+    }
+}
 
-Console.WriteLine(generador.GenerarResumen());
-Console.WriteLine("\n");
+void MostrarMenu()
+{
+    Console.WriteLine("\n=== SISTEMA DE INVENTARIO ===");
+    Console.WriteLine("1. Agregar Producto");
+    Console.WriteLine("2. Listar Productos");
+    Console.WriteLine("3. Buscar por ID");
+    Console.WriteLine("4. Eliminar Producto");
+    Console.WriteLine("5. Buscar por Categoria");
+    Console.WriteLine("6. Ver Resumen");
+    Console.WriteLine("7. Ver Stock Bajo");
+    Console.WriteLine("8. Ver Estadisticas");
+    Console.WriteLine("9. Exportar CVS");
+    Console.WriteLine("10. Salir");
+    Console.WriteLine("\n Seleciona una Opcion");
+}
 
-Console.WriteLine(generador.GenerarReporteStockajo());
-Console.WriteLine("\n");
+void AgregarProducto()
+{
+    Console.Write("\nNombre: ");
+    string nombre = Console.ReadLine() ?? "";
 
-Console.WriteLine(generador.GenerarTopProductos());
-Console.WriteLine("\n");
+    Console.Write("Precio: ");
+    decimal precio = decimal.Parse(Console.ReadLine() ?? "0");
 
-Console.WriteLine(generador.ExportarCsv());
-Console.WriteLine("\n");
+    Console.Write("Canitdad: ");
+    int cantidad = int.Parse(Console.ReadLine() ?? "0");
 
-Console.WriteLine(generador.ExportarResumenJson());
-Console.WriteLine("\n");
+    Console.WriteLine("\nCategorias: Electronica, Ropa, Alimentos, Hogar, Deportes, Libros, Muebles, Otros");
+    Console.Write("Categoria: ");
+    string categoriaStr = Console.ReadLine() ?? "Otros";
+
+    if (Enum.TryParse<CategoriaProducto>(categoriaStr, true, out var categoria))
+    {
+        servicio.AgregarProducto(nombre, precio, cantidad, categoria);
+        Console.WriteLine("\nProducto agregado exitosamente.");
+    }
+    else
+    {
+        Console.WriteLine("\nCategiria No valida.");
+    }
+}
+
+void ListarProductos()
+{
+    var productos = servicio.ObtenerTodosLosProdustos();
+    if (!productos.Any())
+    {
+        Console.WriteLine("No hay productos.");
+    }
+
+    Console.WriteLine("\n=== PRODUCTOS ===");
+    foreach (var producto in productos)
+    {
+        Console.WriteLine($"ID: {producto.Id} {producto.Nombre} | Precio: {producto.Precio} | Cantidad: {producto.Cantidad} | Total: {producto.Total} | Categoria: {producto.Categoria}");
+    }
+}
+
+void BuscarPorId()
+{
+    Console.Write("\nID del producto: ");
+    int id = int.Parse(Console.ReadLine() ?? "0");
+
+    var producto = servicio.ObtenerProductoPorId(id);
+
+    if (producto != null)
+    {
+        Console.WriteLine($"\nID: {producto.Id}");
+        Console.WriteLine($"Nomre: {producto.Nombre}");
+        Console.WriteLine($"Precio: ${producto.Precio}");
+        Console.WriteLine($"Cantidad: {producto.Cantidad}");
+        Console.WriteLine($"Valor Total: {producto.Total}");
+        Console.WriteLine($"Categoria: {producto.Categoria}");
+    }
+    else
+    {
+        Console.WriteLine("\nProducto no encontrado.");
+    }
+}
+
+void EliminarProducto()
+{
+    Console.Write("\nID del producto a eliminar: ");
+    int id = int.Parse(Console.ReadLine() ?? "0");
+
+    var producto = servicio.ObtenerProductoPorId(id);
+    if (producto != null)
+    {
+        servicio.EliminarProducto(id);
+        Console.WriteLine("\nProducto eliminado.");
+    }
+    else
+    {
+        Console.WriteLine("\nProducto no encontrado");
+    }
+}
+
+void BuscarPorCategoria()
+{
+    Console.WriteLine("\nCategorias: Electronica, Ropa, Alimentos, Hogar, Deportes, Libros, Mueles, Otros");
+    Console.Write("Categorias: ");
+    string categoriaStr = Console.ReadLine() ?? "Otros";
+
+    if (Enum.TryParse<CategoriaProducto>(categoriaStr, true, out var categoria))
+    {
+        var productos = servicio.BuscarPorCategoria(categoria);
+        if (!productos.Any())
+        {
+            Console.WriteLine("\nNo hay en esta categoria.");
+            return;
+        }
+
+        Console.WriteLine($"\n=== PRODUCTOS EN {categoria} ===");
+        foreach (var producto in productos)
+        {
+            Console.WriteLine($"ID: {producto.Id} | {producto.Nombre} | {producto.Precio} | {producto.Cantidad}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("\n Categoria no valida.");
+    }
+}
+
+void MostrarResumen()
+{
+    var reporte = servicio.GenerarResumen();
+    Console.WriteLine($"\n{reporte}");
+}
+
+void MostrarStockBajo()
+{
+    var reporte = servicio.GenerarReporteStockBajo();
+    Console.WriteLine($"\n{reporte}");
+}
+
+void MostrarEstadisticas()
+{
+    Console.WriteLine("\n === ESTADISTICAS ===");
+    Console.WriteLine($"Valor total del inventario: {servicio.ObtenerValorTotalInventario()}");
+    Console.WriteLine($"Precio promedio: ${servicio.ObtenerPrecioPromedio()}");
+
+    var masCaro = servicio.ObtenerProductoMasCaro();
+    if (masCaro != null)
+    {
+        Console.WriteLine($"Producto mas caro: {masCaro.Nombre} ${masCaro.Precio}");
+    }
+}
+
+void ExportarCsv()
+{
+    string csv = servicio.ExportarCsv();
+    Console.WriteLine($"\n{csv}");
+}
+
+
+// using Inventario.Factories;
+// using Inventario.Infrastructure;
+// using Inventario.Models;
+
+// var productos = new List<Producto>
+// {
+//     ProductoFactory.Create("Laptop", 1200.00m, 3, CategoriaProducto.Electronica),
+//     ProductoFactory.Create("Camisa", 45.00m, 15, CategoriaProducto.Ropa),
+//     ProductoFactory.Create("Arroz", 12.00m, 50, CategoriaProducto.Alimentos),
+//     ProductoFactory.Create("Lampara", 35.00m, 2, CategoriaProducto.Hogar),
+//     ProductoFactory.Create("balon", 25.00m, 8, CategoriaProducto.Deportes),
+//     ProductoFactory.Create("Mesa", 150.00m, 4, CategoriaProducto.Muebles),
+// };
+
+// var generador = new GeneradorReportes(productos);
+
+// Console.WriteLine(generador.GenerarResumen());
+// Console.WriteLine("\n");
+
+// Console.WriteLine(generador.GenerarReporteStockajo());
+// Console.WriteLine("\n");
+
+// Console.WriteLine(generador.GenerarTopProductos());
+// Console.WriteLine("\n");
+
+// Console.WriteLine(generador.ExportarCsv());
+// Console.WriteLine("\n");
+
+// Console.WriteLine(generador.ExportarResumenJson());
+// Console.WriteLine("\n");
 
 
 

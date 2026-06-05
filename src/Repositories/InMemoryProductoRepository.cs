@@ -103,7 +103,7 @@ public class InMemoryProductoRepository : IProductoRepository
 
   public decimal ObtenerPrecioPromedio()
   {
-    if (_productos.Count == 0)
+    if (_productos.Count() == 0)
     {
       return 0;
     }
